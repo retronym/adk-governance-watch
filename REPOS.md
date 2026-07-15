@@ -31,6 +31,84 @@ regulated-enterprise governance layer bolts onto those seams*.
 
 ---
 
+## Curated documentation links
+
+**ADK — canonical docs** live at **[adk.dev](https://adk.dev)** (the old
+`google.github.io/adk-docs` now 301s here). Language-agnostic; concept pages are
+the same regardless of which SDK you use.
+
+| Topic | Link | Why it matters for us |
+|---|---|---|
+| Docs home / get-started | [adk.dev](https://adk.dev) · [Quickstart](https://adk.dev/get-started/quickstart/) | Conceptual model, one read for all languages |
+| **Plugins** (the seam) | [adk.dev/plugins](https://adk.dev/plugins/) | The governance interception contract — read first |
+| **Callbacks** | [adk.dev/callbacks](https://adk.dev/callbacks/) | Per-agent hooks (vs. global plugins) |
+| **Safety & security** | [adk.dev/safety](https://adk.dev/safety/) | Google's own guardrail guidance |
+| Runtime & events | [adk.dev/runtime](https://adk.dev/runtime/) · [events](https://adk.dev/events/) | Run loop + event log (audit substrate) |
+| Sessions / memory / artifacts | [adk.dev/sessions](https://adk.dev/sessions/) | Pluggable persistence SPIs (residency/retention) |
+| A2A (agent-to-agent) | [adk.dev/a2a](https://adk.dev/a2a/) · [a2aprotocol.ai](https://a2aprotocol.ai) | Cross-agent/-org trust boundary |
+| MCP | [adk.dev/mcp](https://adk.dev/mcp/) · [modelcontextprotocol.io](https://modelcontextprotocol.io) | External-tool boundary |
+| Evaluation | [adk.dev/evaluate](https://adk.dev/evaluate/) | Eval harness shape |
+| Observability | [adk.dev/observability](https://adk.dev/observability/) | Tracing/telemetry hooks |
+| Release notes | [adk.dev/release-notes](https://adk.dev/release-notes/) | Track feature drift |
+
+**Per-repo entry points**
+
+| Repo | Docs / package |
+|---|---|
+| adk-python | [PyPI `google-adk`](https://pypi.org/project/google-adk/) · docs at [adk.dev](https://adk.dev) |
+| adk-java | [Maven `com.google.adk:google-adk`](https://central.sonatype.com/artifact/com.google.adk/google-adk) · [Javadoc](https://javadoc.io/doc/com.google.adk/google-adk) |
+| adk-go | [pkg.go.dev/google.golang.org/adk/v2](https://pkg.go.dev/google.golang.org/adk/v2) |
+| adk-js | [npm `@google/adk`](https://www.npmjs.com/package/@google/adk) |
+| adk-kotlin | [Maven `com.google.adk:google-adk-kotlin-core`](https://central.sonatype.com/artifact/com.google.adk/google-adk-kotlin-core) |
+| adk-samples | [github.com/google/adk-samples](https://github.com/google/adk-samples) |
+| adk-web | [github.com/google/adk-web](https://github.com/google/adk-web) |
+| Community | [r/agentdevelopmentkit](https://www.reddit.com/r/agentdevelopmentkit/) |
+| **Regulus** | [docs.neullabs.com/regulus](https://docs.neullabs.com/regulus/) · [regulus.neullabs.com](https://regulus.neullabs.com) · [Maven `com.neullabs`](https://central.sonatype.com/namespace/com.neullabs) |
+
+**Comparators referenced below**
+
+- LangChain4j — [docs.langchain4j.dev](https://docs.langchain4j.dev) · [github.com/langchain4j/langchain4j](https://github.com/langchain4j/langchain4j)
+- Akka Agentic Platform — [doc.akka.io](https://doc.akka.io/) · [Agent component](https://doc.akka.io/java/agents.html) · [Ask Akka tutorial](https://doc.akka.io/getting-started/ask-akka-agent/the-agent.html)
+
+---
+
+## Project histories
+
+Rough timeline, reconstructed from `git log` in each checkout (first-commit
+dates) plus public announcements. Useful context: **ADK is young** — barely over
+a year old — which is why the extension contract is still visibly settling and
+why a third-party governance layer had room to exist.
+
+| Milestone | When | Note |
+|---|---|---|
+| **adk-python** first commit | 2025-04-02 | The reference implementation; announced around Google Cloud Next '25 |
+| adk-samples / adk-docs first commits | 2025-04-08 / 04-09 | Docs + samples landed within a week of the core |
+| **adk-java** first commit | 2025-05-10 | Java port begins (internal seed) |
+| adk-go / adk-web first commits | 2025-05-19 | Go port + the dev UI |
+| **adk-js** upstreamed to git | 2025-08-14 | TS port made public (developed internally earlier) |
+| **adk-java 1.0 GA** | ~2026-03 | Regulus README pegs it: it shipped "ten days ahead of ADK Java 1.0 GA" |
+| **Regulus** first public release | 2026-03-20 | Neul Labs governance plane, on ADK-Java 1.2.0 |
+| **adk-kotlin** first commit | 2026-05-13 | Newest language; multiplatform (`commonMain`) |
+| Regulus 0.2.0 "enterprise security plane" | 2026-05-23 | Canonical identity, hash-chain audit, RFC 9421 A2A signing |
+
+Where each sits **today** (snapshot 2026-07-15) — very different maturities:
+
+- **adk-python** — by far the most active (~3,300 commits), tags in the **v2.x**
+  line (`v2.4.0`). Treat as the leading indicator of where the contract goes.
+- **adk-java** — ~1,150 commits, **v1.6.x**. The runtime Regulus targets; the
+  one closest to Akka's JVM/enterprise audience.
+- **adk-go** — ~470 commits, already **v2.0.0** (its own cadence).
+- **adk-js** — ~400 commits, **v1.3.x**, split package tags (`adk-*`,
+  `devtools-*`, `main-*`).
+- **adk-kotlin** — youngest (~200 commits), tracking the others; the closest
+  idiom to Scala/Akka.
+- **adk-web / adk-docs / adk-samples** — supporting repos, high churn, follow core.
+- **Regulus** — ~48 commits, **v0.2.1**, pre-1.0 (API may change between minors).
+  Explicitly "tracking ADK releases since" — a live experiment in how a
+  governance layer keeps pace with a moving base.
+
+---
+
 ## The ADK extension surface — the seams to watch
 
 Every ADK language exposes the same core idea: a **plugin** (a.k.a. callback)
@@ -112,6 +190,37 @@ Multi-module Gradle build under [`regulus/platform/`](regulus/platform/).
 `model-registry.md`, `risk-control-matrix.md`, `risk-simulation.md`,
 `consumer-duty.md`, `governance-security.md`; and
 [`regulus/docs/architecture/adk-extension-architecture.md`](regulus/docs/architecture/adk-extension-architecture.md).
+
+---
+
+## Compare & contrast — ADK vs LangChain4j vs Akka AI
+
+Three points of the JVM/agent design space, worth holding side by side. (Python
+ADK is the reference, but for *our* purposes the JVM story — ADK-Java, Regulus,
+LangChain4j, Akka — is the relevant frame.)
+
+| Axis | **Google ADK** | **LangChain4j** | **Akka Agentic Platform** |
+|---|---|---|---|
+| Origin / age | Google, first commit Apr 2025 | Community/OSS, JVM port of LangChain, mature 1.x | Lightbend/Akka, Agent component launched Jul 2025 |
+| Primary shape | Opinionated **agent runtime** with a fixed run loop | **Library / unified API** over LLM providers + vector stores | **Full-stack platform**: runtime + orchestration + memory + streaming |
+| Extension seam | `BasePlugin` callbacks (`before/after {agent,model,tool}`) + per-agent callbacks | AiServices, tools, `ChatMemory`, **guardrails API**, `langchain4j-agentic` module | Agent component + Orchestration; governance/eval as platform features |
+| Multi-agent | Workflow/graph agents + **A2A** | `langchain4j-agentic` (MCP + A2A sub-modules) | **Akka Orchestration** (sequential/parallel/hierarchical), durable |
+| Memory | Pluggable `SessionService`/`MemoryService` SPIs | `ChatMemory` + community vector stores | **Akka Memory** — in-memory + durable, sharded/replicated across the cluster |
+| Durability / resilience | Not intrinsic (bring your own persistence) | Not intrinsic | **Intrinsic** — durable execution, survives crashes; its core differentiator |
+| Governance posture | Seams exist; **guardrails are your job** (or Regulus's) | Guardrails API + provider abstraction; compliance not built-in | Built-in **agent/tool/resource registry**, inline eval, cost/quality interrupts |
+| Deployment | Vertex Agent Engine / self-host | Embed in Quarkus/Spring Boot app | Akka runtime / self-managed cluster / Akka platform |
+| Language reach | Py · Java · Go · JS · Kotlin | JVM (Java/Kotlin/Scala-callable) | JVM (Java SDK; Scala underneath) |
+
+### vs LangChain4j
+- **Same layer, different philosophy.** LangChain4j is the closest JVM analogue to ADK, but it's a **library** you compose, where ADK is a **runtime** you plug into. LangChain4j's `langchain4j-agentic` (MCP + A2A + agentic patterns) and **guardrails API** cover much of ADK's plugin surface, but as opt-in building blocks rather than a fixed lifecycle.
+- **Directly relevant to Regulus:** Regulus's *legacy* examples ([`examples/quickstart`](regulus/examples/quickstart/), [`agent-demo`](regulus/examples/agent-demo/)) are on a **LangChain4j path**, retained as an "alternative runtime" — evidence the governance layer was first prototyped against LangChain4j before committing to ADK's `BasePlugin` seam. Tells us both frameworks were live candidates for a compliance overlay.
+- **Takeaway for Akka:** LangChain4j shows the "unified provider API + guardrails" surface an enterprise expects; ADK shows the "fixed lifecycle to hook" surface. Akka needs a clear answer to *both* — a provider abstraction **and** a deterministic interception point.
+
+### vs Akka AI
+- **Different altitude.** ADK (and LangChain4j) are agent frameworks; **Akka is a platform** — its pitch is runtime + orchestration + memory + streaming + governance as one integrated system. The overlap with ADK is the Agent component + governance registry; the non-overlap is Akka's **durable, fault-tolerant execution**, which ADK explicitly does not provide.
+- **Where Akka is already ahead:** durability, cluster-native sharded/replicated memory, and orchestration are Akka's 15-year strengths — exactly the things ADK leaves to "bring your own." An ADK-style agent that crashes mid-run loses its work; an Akka agent is designed not to.
+- **Where ADK/Regulus are ahead (the gap to close):** a **first-class, ordered plugin lifecycle** that a governance layer can attach to non-invasively, and — critically — the **regulator-facing evidence model** Regulus builds (hash-chained tamper-evident audit, regulation-clause + framework-control-id per event, canonical identity plane, kill-switch dual control, ISO 42001 / EU AI Act mappings). Akka has an agent/tool/resource **registry** and inline eval; it does **not** yet advertise the audit-trail-as-legal-artefact story that Regulus makes its whole product.
+- **The synthesis worth pursuing:** Akka's durable event journal is an unusually good substrate for exactly the tamper-evident, replayable audit trail Regulus hash-chains by hand. The differentiated Akka position is *governance evidence that falls out of the runtime's own durable event log* — rather than bolted on as plugins after the fact.
 
 ---
 
