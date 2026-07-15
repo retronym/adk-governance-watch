@@ -1,0 +1,14 @@
+# Sub-repo working copies — reconstructed by ./clone.sh from repos.txt.
+# We track the manifest + index here, not the upstream sources.
+/adk-docs/
+/adk-go/
+/adk-java/
+/adk-js/
+/adk-kotlin/
+/adk-python/
+/adk-samples/
+/adk-web/
+/regulus/
+
+# OS / editor noise
+.DS_Store

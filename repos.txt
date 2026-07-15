@@ -1,0 +1,11 @@
+# Sub-repo manifest — one per line: <dir> <branch> <git-url>
+# Consumed by ./clone.sh. Lines starting with # and blank lines are ignored.
+adk-docs     main  https://github.com/google/adk-docs.git
+adk-go       main  https://github.com/google/adk-go.git
+adk-java     main  https://github.com/google/adk-java.git
+adk-js       main  https://github.com/google/adk-js.git
+adk-kotlin   main  https://github.com/google/adk-kotlin.git
+adk-python   main  https://github.com/google/adk-python.git
+adk-samples  main  https://github.com/google/adk-samples.git
+adk-web      main  https://github.com/google/adk-web.git
+regulus      main  https://github.com/neul-labs/regulus.git
