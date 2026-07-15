@@ -6,8 +6,8 @@ Eight are Google's **Agent Development Kit (ADK)** repos; one (`regulus`) is a
 third-party **AI-governance / compliance layer** built on top of ADK-Java. The
 reason to keep them checked out together: they are the closest public prior art
 for the **AI + governance features** we want in Akka — ADK shows the *runtime
-extension seams* an agent framework exposes, and Regulus shows *what a
-regulated-enterprise governance layer bolts onto those seams*.
+extension points* an agent framework exposes, and Regulus shows *what a
+regulated-enterprise governance layer bolts onto those hooks*.
 
 ---
 
@@ -40,10 +40,10 @@ the same regardless of which SDK you use.
 | Topic | Link | Why it matters for us |
 |---|---|---|
 | Docs home / get-started | [adk.dev](https://adk.dev) · [Quickstart](https://adk.dev/get-started/quickstart/) | Conceptual model, one read for all languages |
-| **Plugins** (the seam) | [adk.dev/plugins](https://adk.dev/plugins/) | The governance interception contract — read first |
+| **Plugins** (the hook) | [adk.dev/plugins](https://adk.dev/plugins/) | The governance interception contract — read first |
 | **Callbacks** | [adk.dev/callbacks](https://adk.dev/callbacks/) | Per-agent hooks (vs. global plugins) |
 | **Safety & security** | [adk.dev/safety](https://adk.dev/safety/) | Google's own guardrail guidance |
-| Runtime & events | [adk.dev/runtime](https://adk.dev/runtime/) · [events](https://adk.dev/events/) | Run loop + event log (audit substrate) |
+| Runtime & events | [adk.dev/runtime](https://adk.dev/runtime/) · [events](https://adk.dev/events/) | Run loop + event log (what the audit trail is built from) |
 | Sessions / memory / artifacts | [adk.dev/sessions](https://adk.dev/sessions/) | Pluggable persistence SPIs (residency/retention) |
 | A2A (agent-to-agent) | [adk.dev/a2a](https://adk.dev/a2a/) · [a2aprotocol.ai](https://a2aprotocol.ai) | Cross-agent/-org trust boundary |
 | MCP | [adk.dev/mcp](https://adk.dev/mcp/) · [modelcontextprotocol.io](https://modelcontextprotocol.io) | External-tool boundary |
@@ -109,7 +109,7 @@ Where each sits **today** (snapshot 2026-07-15) — very different maturities:
 
 ---
 
-## The ADK extension surface — the seams to watch
+## The ADK extension surface — the hooks to watch
 
 Every ADK language exposes the same core idea: a **plugin** (a.k.a. callback)
 contract that fires at fixed points in the agent run loop. This is the single
@@ -134,13 +134,13 @@ on_user_message  →  before_run  →  before_agent
     (+ on_agent_error / on_run_error)
 ```
 
-Governance value of each seam:
-- **before_model / after_model** — policy checks, prompt/response redaction, model-risk gating, audit capture. The busiest governance seam.
+Governance value of each hook:
+- **before_model / after_model** — policy checks, prompt/response redaction, model-risk gating, audit capture. The busiest one by far.
 - **before_tool / after_tool** — tool authorization, argument validation, egress control.
 - **before_agent / after_agent** — kill-switch, data-residency admission control.
 - **on_\*_error** — failure capture for the audit trail.
 
-**Adjacent seams that matter for governance** (also worth tracking in each repo):
+**Adjacent extension points that matter for governance** (also worth tracking in each repo):
 - **Tool confirmation / HITL** — ADK's human-in-the-loop primitive (`ToolConfirmation`). The hook for approval gates & dual control.
 - **Session / Memory / Artifact services** — pluggable persistence SPIs; the place residency and retention are enforced at construction.
 - **Event compaction** — retention/aging of the event log.
@@ -149,15 +149,15 @@ Governance value of each seam:
 
 ---
 
-## Regulus — a worked governance layer over the seams above
+## Regulus — a worked governance layer over the hooks above
 
 Regulus is the most useful single artifact here: it's a concrete answer to
 "what does an enterprise governance layer *add* to a bare agent framework?"
 Multi-module Gradle build under [`regulus/platform/`](regulus/platform/).
 
-**How it maps onto ADK seams** (from its README — this table is the crux):
+**How it maps onto ADK hooks** (from its README — this table is the crux):
 
-| ADK seam | Regulus control |
+| ADK hook | Regulus control |
 |---|---|
 | Inbound HTTP / SecurityContext | `OidcSecurityContextFilter` → `IdentityAdapter` → canonical `Identity` |
 | `BeforeAgentCallback` | kill-switch, data-residency admission |
@@ -174,7 +174,7 @@ Multi-module Gradle build under [`regulus/platform/`](regulus/platform/).
 | Concern | Module | Watch for |
 |---|---|---|
 | Canonical identity + adapter SPI | `regulus-ai-identity`, `-identity-bridge` | one `Principal`/`Claims` shape; OIDC/SAML/mTLS adapters |
-| Policy engine | `regulus-ai-policy`, `-adk-plugins` (`DefaultPolicyEngine`, `PolicyDecision`) | allow/deny decisioning at the seams |
+| Policy engine | `regulus-ai-policy`, `-adk-plugins` (`DefaultPolicyEngine`, `PolicyDecision`) | allow/deny decisioning at each hook |
 | Privacy / redaction | `regulus-ai-privacy` (`RegulusPrivacyPlugin`) | PII detection + mutating redaction pre/post model |
 | Kill switch + dual control | `regulus-ai-kill-switch` (`KillSwitchStore`) | identity-gated activation, approver-distinctness |
 | Audit / observability | `regulus-ai-observability` (`RegulusAuditPlugin`, `KafkaAuditSink`) | **SHA-256 hash-chained, tamper-evident** event log; offline verifier |
@@ -203,24 +203,24 @@ LangChain4j, Akka — is the relevant frame.)
 |---|---|---|---|
 | Origin / age | Google, first commit Apr 2025 | Community/OSS, JVM port of LangChain, mature 1.x | Lightbend/Akka, Agent component launched Jul 2025 |
 | Primary shape | Opinionated **agent runtime** with a fixed run loop | **Library / unified API** over LLM providers + vector stores | **Full-stack platform**: runtime + orchestration + memory + streaming |
-| Extension seam | `BasePlugin` callbacks (`before/after {agent,model,tool}`) + per-agent callbacks | AiServices, tools, `ChatMemory`, **guardrails API**, `langchain4j-agentic` module | Agent component + Orchestration; governance/eval as platform features |
+| Extension point | `BasePlugin` callbacks (`before/after {agent,model,tool}`) + per-agent callbacks | AiServices, tools, `ChatMemory`, **guardrails API**, `langchain4j-agentic` module | Agent component + Orchestration; governance/eval as platform features |
 | Multi-agent | Workflow/graph agents + **A2A** | `langchain4j-agentic` (MCP + A2A sub-modules) | **Akka Orchestration** (sequential/parallel/hierarchical), durable |
 | Memory | Pluggable `SessionService`/`MemoryService` SPIs | `ChatMemory` + community vector stores | **Akka Memory** — in-memory + durable, sharded/replicated across the cluster |
 | Durability / resilience | Not intrinsic (bring your own persistence) | Not intrinsic | **Intrinsic** — durable execution, survives crashes; its core differentiator |
-| Governance posture | Seams exist; **guardrails are your job** (or Regulus's) | Guardrails API + provider abstraction; compliance not built-in | Built-in **agent/tool/resource registry**, inline eval, cost/quality interrupts |
+| Governance built-in? | Hooks exist; **guardrails are your job** (or Regulus's) | Guardrails API + provider abstraction; compliance not built-in | Built-in **agent/tool/resource registry**, inline eval, cost/quality interrupts |
 | Deployment | Vertex Agent Engine / self-host | Embed in Quarkus/Spring Boot app | Akka runtime / self-managed cluster / Akka platform |
 | Language reach | Py · Java · Go · JS · Kotlin | JVM (Java/Kotlin/Scala-callable) | JVM (Java SDK; Scala underneath) |
 
 ### vs LangChain4j
 - **Same layer, different philosophy.** LangChain4j is the closest JVM analogue to ADK, but it's a **library** you compose, where ADK is a **runtime** you plug into. LangChain4j's `langchain4j-agentic` (MCP + A2A + agentic patterns) and **guardrails API** cover much of ADK's plugin surface, but as opt-in building blocks rather than a fixed lifecycle.
-- **Directly relevant to Regulus:** Regulus's *legacy* examples ([`examples/quickstart`](regulus/examples/quickstart/), [`agent-demo`](regulus/examples/agent-demo/)) are on a **LangChain4j path**, retained as an "alternative runtime" — evidence the governance layer was first prototyped against LangChain4j before committing to ADK's `BasePlugin` seam. Tells us both frameworks were live candidates for a compliance overlay.
+- **Directly relevant to Regulus:** Regulus's *legacy* examples ([`examples/quickstart`](regulus/examples/quickstart/), [`agent-demo`](regulus/examples/agent-demo/)) are on a **LangChain4j path**, retained as an "alternative runtime" — evidence the governance layer was first prototyped against LangChain4j before committing to ADK's `BasePlugin` contract. Tells us both frameworks were live candidates for a compliance overlay.
 - **Takeaway for Akka:** LangChain4j shows the "unified provider API + guardrails" surface an enterprise expects; ADK shows the "fixed lifecycle to hook" surface. Akka needs a clear answer to *both* — a provider abstraction **and** a deterministic interception point.
 
 ### vs Akka AI
-- **Different altitude.** ADK (and LangChain4j) are agent frameworks; **Akka is a platform** — its pitch is runtime + orchestration + memory + streaming + governance as one integrated system. The overlap with ADK is the Agent component + governance registry; the non-overlap is Akka's **durable, fault-tolerant execution**, which ADK explicitly does not provide.
+- **Different scope.** ADK (and LangChain4j) are agent frameworks; **Akka is a platform** — its pitch is runtime + orchestration + memory + streaming + governance as one integrated system. The overlap with ADK is the Agent component + governance registry; the non-overlap is Akka's **durable, fault-tolerant execution**, which ADK explicitly does not provide.
 - **Where Akka is already ahead:** durability, cluster-native sharded/replicated memory, and orchestration are Akka's 15-year strengths — exactly the things ADK leaves to "bring your own." An ADK-style agent that crashes mid-run loses its work; an Akka agent is designed not to.
-- **Where ADK/Regulus are ahead (the gap to close):** a **first-class, ordered plugin lifecycle** that a governance layer can attach to non-invasively, and — critically — the **regulator-facing evidence model** Regulus builds (hash-chained tamper-evident audit, regulation-clause + framework-control-id per event, canonical identity plane, kill-switch dual control, ISO 42001 / EU AI Act mappings). Akka has an agent/tool/resource **registry** and inline eval; it does **not** yet advertise the audit-trail-as-legal-artefact story that Regulus makes its whole product.
-- **The synthesis worth pursuing:** Akka's durable event journal is an unusually good substrate for exactly the tamper-evident, replayable audit trail Regulus hash-chains by hand. The differentiated Akka position is *governance evidence that falls out of the runtime's own durable event log* — rather than bolted on as plugins after the fact.
+- **Where ADK/Regulus are ahead (the gap to close):** a **proper ordered plugin lifecycle** that a governance layer can attach to without patching the framework, and — critically — the **regulator-facing evidence model** Regulus builds (hash-chained tamper-evident audit, regulation-clause + framework-control-id per event, canonical identity plane, kill-switch dual control, ISO 42001 / EU AI Act mappings). Akka has an agent/tool/resource **registry** and inline eval; it does **not** yet advertise the audit-trail-as-legal-artefact story that Regulus makes its whole product.
+- **The synthesis worth pursuing:** Akka's durable event journal is an unusually good foundation for exactly the tamper-evident, replayable audit trail Regulus hash-chains by hand. The differentiated Akka position is *governance evidence that falls out of the runtime's own durable event log* — rather than bolted on as plugins after the fact.
 
 ---
 
@@ -228,13 +228,13 @@ LangChain4j, Akka — is the relevant frame.)
 
 Concrete carry-overs when designing the equivalent Akka surface:
 
-1. **A first-class plugin/callback lifecycle.** ADK's `before/after {agent,model,tool}` + `on_*_error` is the minimum viable interception surface. Any Akka agent runtime needs the analogue before governance can attach non-invasively.
-2. **Governance as plugins, not framework forks.** Regulus's whole thesis: every control is a `BasePlugin` on the *official* contract — "not Spring AOP, not bytecode rewriting." Design our seams so a compliance layer never has to monkey-patch.
-3. **Mutating pre/post-model hooks.** Redaction requires callbacks that can *rewrite* the request/response, not just observe. Confirm our seam contract allows mutation and defines ordering (Regulus runs expiry-guard → policy → privacy → model-risk).
+1. **A built-in plugin/callback lifecycle.** ADK's `before/after {agent,model,tool}` + `on_*_error` is the minimum viable interception surface. Any Akka agent runtime needs the analogue before governance can attach without patching the framework.
+2. **Governance as plugins, not framework forks.** Regulus's whole thesis: every control is a `BasePlugin` on the *official* contract — "not Spring AOP, not bytecode rewriting." Design our hooks so a compliance layer never has to monkey-patch.
+3. **Mutating pre/post-model hooks.** Redaction requires callbacks that can *rewrite* the request/response, not just observe. Confirm our callback contract allows mutation and defines ordering (Regulus runs expiry-guard → policy → privacy → model-risk).
 4. **Deterministic plugin ordering + a manager.** All five ADK langs ship a `PluginManager`. Ordering is a governance-correctness property (guard must run first).
 5. **Pluggable persistence SPIs (session/memory/artifact).** Residency & retention are enforced where these are *constructed*. Akka already has strong persistence primitives — this is a natural strength to lean on.
 6. **Tamper-evident audit trail.** Hash-chained events + offline verifier is the differentiated bit auditors actually want. Akka's event-sourcing/journal story maps unusually well here — a potential advantage over ADK.
-7. **Canonical identity plane.** One `Principal`/`Claims` with adapter SPI (OIDC/SAML/mTLS), tenant + jurisdiction as first-class claims on every decision and event.
+7. **Canonical identity plane.** One `Principal`/`Claims` with adapter SPI (OIDC/SAML/mTLS), tenant + jurisdiction as top-level claims on every decision and event.
 8. **HITL / dual-control primitive.** ADK's `ToolConfirmation`; Regulus reuses it for kill-switch dual control with approver-distinctness. Decide our HITL primitive early — everything approval-shaped rides on it.
 9. **Cross-org A2A trust boundary.** Signed envelopes (RFC 9421), replay protection, reconstruct caller identity *before* policy runs. Relevant if Akka agents federate across clusters/orgs.
 10. **Framework/regulation mapping as data.** Regulus emits regulation-clause + framework-control-id + risk-tier *per event*. The evidence model (not just the enforcement) is half the product.
